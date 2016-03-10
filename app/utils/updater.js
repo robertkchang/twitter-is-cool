@@ -1,5 +1,6 @@
 var Tweet = require('../models/tweet');
 var Update = require('../models/update');
+var request = require('request');
 
 var Updater = function(configuration) {
 	this.keywords = configuration.keywordsArr;
@@ -44,23 +45,21 @@ Updater.prototype.saveUpdate = function(result, elem){
 	console.log("keyword: " + elem + "; " + count);
 
 	// post updates
-	Update.findOne({ keyword: elem }, function(err, update) {
-		if (err || update==null) {
-			updateToSave = new Update();
-			updateToSave['keyword'] = elem;
-		} else {
-			updateToSave = update;
-		}
-
-		updateToSave['count'] = count;
-		updateToSave['lastUpdated'] = Date.now();
-		updateToSave.save(function(err) {
-			if (err) {
-				console.log('Error saving update: ' + err);
+	request({
+			url: 'http://localhost:5000/v1/updates', //URL to hit
+			qs: {from: 'blog example', time: +new Date()}, //Query string data
+			method: 'POST',
+			//Lets post the following key/values as form
+			json: {
+							keyword: elem,
+							hourly_total: count
+						}
+		}, function(error, response, body){
+			if(error) {
+					console.log('Updater error saving: ' + error);
 			} else {
-				console.log('Update saved.');
+					console.log(response.statusCode, body);
 			}
-		})
 	});
 };
 

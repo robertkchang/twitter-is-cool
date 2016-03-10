@@ -1,6 +1,7 @@
 var express = require('express');
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
+var bodyParser = require('body-parser');
 var mongoose = require('mongoose');
 var path = require('path');
 
@@ -8,6 +9,11 @@ var path = require('path');
 var updates = require('./routes/updates');
 
 var app = express();
+
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(express.static(path.join(__dirname, 'public')));
+app.set('view engine', 'jade');
 
 // ==== ROUTE STUFF ======
 app.use('/v1', updates);
