@@ -5,11 +5,15 @@ var bodyParser = require('body-parser');
 var mongoose = require('mongoose');
 var path = require('path');
 
+var env = process.env.NODE_ENV || 'development';
+var config = require('./config/config')[env];
+
 // var routes = require('./routes/index');
 var updates = require('./routes/updates');
 
 var app = express();
 
+app.set('port', process.env.PORT || config.port || 3000);
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')));
@@ -70,17 +74,18 @@ var updater = new Updater(configuration);
 updater.start();
 
 // ======== MONGOOSE ======
-mongoose.connect('mongodb://localhost/twitter-is-cool');
+console.log("config.db: " + config.db);
+mongoose.connect(config.db);
 
 var db = mongoose.connection;
 	db.on('error', console.error.bind(console, 'connection error:'));
 	db.once('open', function (callback) {
-		 console.log("twitter-is-cool database opened!");
+		 console.log(config.db + " database opened!");
 });
 
 // ======== SERVER ======
-app.listen(5000, function(){
-	console.log('listening on *:5000');
+app.listen(app.get('port'), function(){
+	console.log('listening on *:' + app.get('port'));
 });
 
 module.exports = app;

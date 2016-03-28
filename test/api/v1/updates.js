@@ -1,69 +1,43 @@
-var mongoose = require('mongoose');
-var Configure = require('../../../app/utils/configure');
 var DatabaseUtils = require('../../utils/database_utils');
-
-var Update = require('../../../app/models/update');
-var Tweet = require('../../../app/models/tweet');
 
 var should = require('chai').should(),
 		supertest = require('supertest'),
 		assert = require('assert'),
 		api = supertest('http://localhost:5000');
-var configuration = new Configure();
-configuration.load();
+
+var env = process.env.NODE_ENV || 'development';
+var config = require('../../../config/config')[env];
 
 describe('Updates', function(){
-	beforeEach(function(){
-		// ======== MONGOOSE ======
-		mongoose.connect('mongodb://localhost/twitter-is-cool-test');
+	before(function(done){
+		beforeFn = function(cb) {
+			DatabaseUtils.connectDB(config);
+			DatabaseUtils.cleanDB();
+			DatabaseUtils.stageData();
+			if (cb) { cb(); };
+		}
+		beforeFn(function(){ done(); });
+	});
 
-		var db = mongoose.connection;
-			db.on('error', console.error.bind(console, 'connection error:'));
-			db.once('open', function (callback) {
-				 console.log("twitter-is-cool-test database opened!");
-		});
-
-		DatabaseUtils.cleanDB();
-
-		update = new Update();
-		update['keyword'] = 'Test';
-		update['count'] = 100;
-		update['lastUpdated'] = Date.now();
-
-		update2 = new Update();
-		update2['keyword'] = 'Tes2t';
-		update2['count'] = 200;
-		update2['lastUpdated'] = Date.now();
-
-		update.save(function(err) {
-			if (err) {
-				console.log("error: " + err);
-			} else {
-				console.log("saving update");
-			}
-		});
-
-		update2.save(function(err) {
-			if (err) {
-				console.log("error: " + err);
-			} else {
-				console.log("saving update2");
-			}
-		});
+	after(function(done){
+		afterFn = function(cb) {
+			DatabaseUtils.closeDB(config);
+			if (cb) { cb(); };
+		}
+		afterFn(function(err){done();});
 	})
 
-	describe('GET /updates', function(){
-		it('should return 200', function(done){
+	describe('/updates', function(){
+		it('GET /updates should return 200', function(done){
+			console.log('running GET /updates');
 			api.get('/v1/updates')
 				 .expect(200, done);
 		})
-	})
 
-	describe('GET /updates/keyword', function(){
-		it('should return 200', function(done){
-			firstKeyword = configuration.keywordsArr[0];
-			api.get('/v1/updates/' + firstKeyword)
+		it('GET /updates/:keyword should return 200', function(done){
+			console.log('running GET /updates/:keyword');
+			api.get('/v1/updates/Test')
 				 .expect(200, done);
 		})
-	})
+	});
 })

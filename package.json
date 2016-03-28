@@ -3,8 +3,8 @@
 	"version": "0.0.0",
 	"private": true,
 	"scripts": {
-		"start": "node app.js",
-		"test": "mocha --timeout 5000 test/api/v1/*.js"
+		"start": "NODE_ENV=development node app.js",
+		"test": "NODE_ENV=test node ./node_modules/.bin/grunt test"
 	},
 	"dependencies": {
 		"body-parser": "~1.13.2",
@@ -21,6 +21,13 @@
 	},
 	"devDependencies": {
 		"chai": "^3.5.0",
+		"grunt": "^0.4.5",
+		"grunt-cli": "^0.1.13",
+		"grunt-express-server": "^0.5.2",
+		"grunt-mocha": "^0.4.15",
+		"grunt-mocha-cli": "^2.0.0",
+		"grunt-mocha-test": "^0.12.7",
+		"grunt-simple-mocha": "^0.4.1",
 		"mocha": "^2.4.5",
 		"supertest": "^1.2.0"
 	}
